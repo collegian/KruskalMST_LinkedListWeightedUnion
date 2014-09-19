@@ -8,7 +8,7 @@ public final class Edge
    private int weight;
    private Vertex startVertex,endVertex;
    
-   public Edge createEdge(Vertex start, Vertex end, int weight)
+   public static Edge createEdge(Vertex start, Vertex end, int weight)
    {
 	   return new Edge(start,end,weight);
    }
@@ -57,6 +57,11 @@ public final class Edge
      {
  		return Objects.hashCode(startVertex,endVertex);
  	}
+     
+    public String toString()
+    {
+    	return "Edge from:" + startVertex + " to:" + endVertex + " having weight:" + weight;
+    }
 
 
 //	@Override

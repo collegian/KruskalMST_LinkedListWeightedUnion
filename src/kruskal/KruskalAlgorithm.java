@@ -15,13 +15,17 @@ import java.util.stream.Collectors;
 import com.google.common.collect.Lists;
 
 import kruskal.Node;
-
+/**
+ * This is a greedy algorithm and selects the least weight edge at each stage. This makes use of a linked list representation
+ * of the set with weighted union heuristic.
+ * @author Rahul
+ */
 public final class KruskalAlgorithm 
 {
 	private Graph graph;
 	
 	//TODO: See if there is a better way of representing a node set corresponding to each vertex.
-	private Set<Node> nodes;
+	private Set<SetObject> setObjects = new HashSet<>();
 	
 	public Set<Edge> getMinimumSpanningTree(Graph graph)
 	{
@@ -44,12 +48,17 @@ public final class KruskalAlgorithm
 		
 		for(Edge edge:edgesList)
 		{
-			Node startVertexSetNode = findSet(edge.getStartVertex());
-			Node endVertexSetNode = findSet(edge.getEndVertex());
-			if(startVertexSetNode!=endVertexSetNode)
+			SetObject startVertexSetObject = findSet(edge.getStartVertex());
+			SetObject endVertexSetObject = findSet(edge.getEndVertex());
+			
+			if(startVertexSetObject==null || endVertexSetObject==null)
+			{
+				throw new IllegalStateException("Couldn't find the set representative object corresponding to the edge:" + edge);
+			}
+			if(startVertexSetObject!=endVertexSetObject)
 			{
 				mstEdges.add(edge);
-				union(startVertexSetNode,endVertexSetNode);
+				union(startVertexSetObject,endVertexSetObject);
 			}
 		}
 		
@@ -77,14 +86,15 @@ public final class KruskalAlgorithm
 	private void makeSet(Vertex vertex)
 	{
 		// The set object char represents the length of the Set.
-		Node setObject = new Node(null,null,'0');
+		SetObject setObject = SetObject.createSetObject(null, null, 0);
+         
+		Node vertexNode = Node.createNode(setObject, null, vertex.getName());
 		
-		Node vertexNode = new Node(setObject,null,vertex.getName());
 		setObject.setHead(vertexNode);
 		setObject.setTail(vertexNode);
-		setObject.setVertex('1');
+		setObject.setLength(1);
 		
-		nodes.add(vertexNode);
+		setObjects.add(setObject);
 	}
 	
 	private void sortEdges(List<Edge> edgesList)
@@ -109,30 +119,44 @@ public final class KruskalAlgorithm
 		      });
 	}
 	
-	private Node findSet(Vertex vertex)
+	//TODO: Improve performance!
+	private SetObject findSet(Vertex vertex)
 	{
-	  Set<Node> node= nodes.stream().filter(n->n.getVertexChar()==vertex.getName()).map(n->n.getHead()).collect(Collectors.toSet());
-	  
-	  if(node.size()>1)
-	  {
-		  throw new IllegalStateException("The set has more than 1 representative set object.");
-	  }
-	  
-	  return node.iterator().next();
-	}
-	
-	private void union(Node start,Node end)
-	{
-		char startVertexSetLength = start.getVertexChar();
-		char endVertexSetLength = end.getVertexChar();
-		
-		if(!Character.isDigit(startVertexSetLength) || !Character.isDigit(endVertexSetLength))
+		for(SetObject setObject : setObjects)
 		{
-			throw new IllegalStateException("The set representative object doesn't contain the length of the set");
+			Node node = setObject.getHead();
+			if(node.getVertexChar()==vertex.getName())
+			{
+				return setObject;
+			}
+			
+			while(node.getTail()!=null)
+			{
+				Node tail = node.getTail();
+				if(tail.getVertexChar()==vertex.getName())
+				{
+					return setObject;
+				}
+				node = tail;
+			}
 		}
 		
-		int startLength = Character.getNumericValue(startVertexSetLength);
-		int endLength =Character.getNumericValue(endVertexSetLength); 
+		return null;
+			
+//      Set<SetObject> setObject =  setObjects.stream().filter(setObj -> setObj.getHead().getVertexChar()==vertex.getName()).collect(Collectors.toSet());
+//	  
+//	  if(setObject.size()>1)
+//	  {
+//		  throw new IllegalStateException("The set has more than 1 representative set object.");
+//	  }
+//	  
+//	  return setObject.iterator().next();
+	}
+	
+	private void union(SetObject start,SetObject end)
+	{
+		int startLength = start.getLength();
+		int endLength = end.getLength(); 
 		
 		// The linked list length for the first vertex is > than that for the second vertex
 		// Therefore attach the second list to the first.
@@ -143,8 +167,9 @@ public final class KruskalAlgorithm
 			end.getHead().setHead(start);
 			
 			start.setTail(end.getTail());
+			start.setLength(++startLength);
+			setObjects.remove(end);
 			
-			// TODO : Is this needed or pointless?
 			end=null;
 		}
 		else
@@ -153,6 +178,9 @@ public final class KruskalAlgorithm
 			endTail.setTail(start.getHead());
 			start.getHead().setHead(end);
 			end.setTail(start.getTail());
+			
+			end.setLength(++endLength);
+			setObjects.remove(start);
 			
 			start = null;
 		}

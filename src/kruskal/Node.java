@@ -4,11 +4,16 @@ package kruskal;
    
    public final class Node
    {
-	   private Node head;
+	   private SetObject head;
 	   private Node tail;
 	   private char vertex;
 	   
-	   Node(Node head, Node tail, char vertex)
+	   public static Node createNode(SetObject head, Node tail, char vertex)
+	   {
+		  return new Node(head,tail,vertex);
+	   }
+	   
+	   private Node(SetObject head, Node tail, char vertex)
 	   {
 		   this.head = head;
 		   this.tail = tail;
@@ -20,7 +25,7 @@ package kruskal;
 		   return vertex;
 	   }
 	   
-	   public Node getHead()
+	   public SetObject getHead()
 	   {
 		   return head;
 	   }
@@ -30,7 +35,7 @@ package kruskal;
 		   return tail;
 	   }
 	   
-	   public void setHead(Node newHead)
+	   public void setHead(SetObject newHead)
 	   {
 		   this.head = newHead;
 	   }
