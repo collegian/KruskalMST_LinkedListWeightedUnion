@@ -49,29 +49,8 @@ public final class KruskalAlgorithm
 		
 		for(Edge edge:edgesList)
 		{
-			Optional<SetObject> start = findSet(edge.getStartVertex());
-			SetObject startVertexSetObject = null;
-			
-			if(start.isPresent())
-			{
-				 startVertexSetObject = start.get();
-			}
-			else
-			{
-				throw new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getStartVertex().getName());
-			}
-			
-			Optional<SetObject> end = findSet(edge.getEndVertex());
-			SetObject endVertexSetObject = null;
-			
-			if(end.isPresent())
-			{
-				endVertexSetObject = end.get();
-			}
-			else
-			{
-				throw new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getEndVertex().getName());
-			}
+			SetObject startVertexSetObject=findSet(edge.getStartVertex()).orElseThrow(()->new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getStartVertex().getName()));
+			SetObject endVertexSetObject  = findSet(edge.getEndVertex()).orElseThrow(()->new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getStartVertex().getName()));
 			
 			if(startVertexSetObject!=endVertexSetObject)
 			{
