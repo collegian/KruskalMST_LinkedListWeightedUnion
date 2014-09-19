@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
@@ -48,13 +49,30 @@ public final class KruskalAlgorithm
 		
 		for(Edge edge:edgesList)
 		{
-			SetObject startVertexSetObject = findSet(edge.getStartVertex());
-			SetObject endVertexSetObject = findSet(edge.getEndVertex());
+			Optional<SetObject> start = findSet(edge.getStartVertex());
+			SetObject startVertexSetObject = null;
 			
-			if(startVertexSetObject==null || endVertexSetObject==null)
+			if(start.isPresent())
 			{
-				throw new IllegalStateException("Couldn't find the set representative object corresponding to the edge:" + edge);
+				 startVertexSetObject = start.get();
 			}
+			else
+			{
+				throw new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getStartVertex().getName());
+			}
+			
+			Optional<SetObject> end = findSet(edge.getEndVertex());
+			SetObject endVertexSetObject = null;
+			
+			if(end.isPresent())
+			{
+				endVertexSetObject = end.get();
+			}
+			else
+			{
+				throw new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getEndVertex().getName());
+			}
+			
 			if(startVertexSetObject!=endVertexSetObject)
 			{
 				mstEdges.add(edge);
@@ -120,14 +138,14 @@ public final class KruskalAlgorithm
 	}
 	
 	//TODO: Improve performance!
-	private SetObject findSet(Vertex vertex)
+	private Optional<SetObject> findSet(Vertex vertex)
 	{
 		for(SetObject setObject : setObjects)
 		{
 			Node node = setObject.getHead();
 			if(node.getVertexChar()==vertex.getName())
 			{
-				return setObject;
+				return Optional.ofNullable(setObject);
 			}
 			
 			while(node.getTail()!=null)
@@ -135,22 +153,13 @@ public final class KruskalAlgorithm
 				Node tail = node.getTail();
 				if(tail.getVertexChar()==vertex.getName())
 				{
-					return setObject;
+					return Optional.ofNullable(setObject);
 				}
 				node = tail;
 			}
 		}
 		
-		return null;
-			
-//      Set<SetObject> setObject =  setObjects.stream().filter(setObj -> setObj.getHead().getVertexChar()==vertex.getName()).collect(Collectors.toSet());
-//	  
-//	  if(setObject.size()>1)
-//	  {
-//		  throw new IllegalStateException("The set has more than 1 representative set object.");
-//	  }
-//	  
-//	  return setObject.iterator().next();
+		return Optional.empty();
 	}
 	
 	private void union(SetObject start,SetObject end)
