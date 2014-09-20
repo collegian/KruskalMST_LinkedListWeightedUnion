@@ -3,6 +3,7 @@ package graph.components;
 
 import com.google.common.base.Objects;
 
+//TODO: Is this class even needed? Would it be better to just represent the vertex with a char (or whatever better data type) instead?
 public final class Vertex 
 {
   // TODO: Think of a better way to represent the name. String will consume a lot of memory!

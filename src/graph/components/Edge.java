@@ -62,22 +62,4 @@ public final class Edge
     {
     	return "Edge from:" + startVertex + " to:" + endVertex + " having weight:" + weight;
     }
-
-
-//	@Override
-//	public int compareTo(Edge other) 
-//	{
-//		if(weight>other.weight)
-//		{
-//			return 1;
-//		}
-//		
-//		else if(weight==other.weight)
-//		{
-//			return 0;
-//		}
-//		
-//		return -1;
-//	}
-
 }

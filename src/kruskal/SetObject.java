@@ -1,5 +1,9 @@
 package kruskal;
 
+/**
+ * The SetObject of each Set. This contains the length of the set and pointers to the head and tail of the list.
+ * @author Rahul
+ */
 public final class SetObject 
 {
     private Node head;

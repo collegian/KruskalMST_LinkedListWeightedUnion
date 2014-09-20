@@ -25,8 +25,8 @@ public final class KruskalAlgorithm
 {
 	private Graph graph;
 	
-	//TODO: See if there is a better way of representing a node set corresponding to each vertex.
-	private Set<SetObject> setObjects = new HashSet<>();
+	//TODO: See if there is a better way of representing a nodes.
+	private Set<Node> nodes = new HashSet<>();
 	
 	public Set<Edge> getMinimumSpanningTree(Graph graph)
 	{
@@ -82,7 +82,6 @@ public final class KruskalAlgorithm
 	
 	private void makeSet(Vertex vertex)
 	{
-		// The set object char represents the length of the Set.
 		SetObject setObject = SetObject.createSetObject(null, null, 0);
          
 		Node vertexNode = Node.createNode(setObject, null, vertex.getName());
@@ -91,7 +90,7 @@ public final class KruskalAlgorithm
 		setObject.setTail(vertexNode);
 		setObject.setLength(1);
 		
-		setObjects.add(setObject);
+		nodes.add(vertexNode);
 	}
 	
 	private void sortEdges(List<Edge> edgesList)
@@ -116,29 +115,9 @@ public final class KruskalAlgorithm
 		      });
 	}
 	
-	//TODO: Improve performance!
 	private Optional<SetObject> findSet(Vertex vertex)
 	{
-		for(SetObject setObject : setObjects)
-		{
-			Node node = setObject.getHead();
-			if(node.getVertexChar()==vertex.getName())
-			{
-				return Optional.ofNullable(setObject);
-			}
-			
-			while(node.getTail()!=null)
-			{
-				Node tail = node.getTail();
-				if(tail.getVertexChar()==vertex.getName())
-				{
-					return Optional.ofNullable(setObject);
-				}
-				node = tail;
-			}
-		}
-		
-		return Optional.empty();
+		return Optional.ofNullable(nodes.stream().filter(n->n.getVertexChar()==vertex.getName()).map(n->n.getHead()).collect(Collectors.toSet()).iterator().next());
 	}
 	
 	private void union(SetObject start,SetObject end)
@@ -152,11 +131,16 @@ public final class KruskalAlgorithm
 		{
 			Node startTail = start.getTail();
 			startTail.setTail(end.getHead());
-			end.getHead().setHead(start);
+			
+			Node endHead = end.getHead();
+			while(endHead!=null)
+			{
+				endHead.setHead(start);
+				endHead = endHead.getTail();
+			}
 			
 			start.setTail(end.getTail());
 			start.setLength(++startLength);
-			setObjects.remove(end);
 			
 			end=null;
 		}
@@ -164,11 +148,17 @@ public final class KruskalAlgorithm
 		{
 			Node endTail = end.getTail();
 			endTail.setTail(start.getHead());
-			start.getHead().setHead(end);
+			
+			// Setting each node in the list being added to point to the new set object.
+			Node startHead = start.getHead();
+			while(startHead!=null)
+			{
+				startHead.setHead(end);
+				startHead = startHead.getTail();
+			}
 			end.setTail(start.getTail());
 			
 			end.setLength(++endLength);
-			setObjects.remove(start);
 			
 			start = null;
 		}
