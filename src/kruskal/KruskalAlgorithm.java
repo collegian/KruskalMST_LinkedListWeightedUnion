@@ -49,8 +49,8 @@ public final class KruskalAlgorithm
 		
 		for(Edge edge:edgesList)
 		{
-			SetObject startVertexSetObject=findSet(edge.getStartVertex()).orElseThrow(()->new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getStartVertex().getName()));
-			SetObject endVertexSetObject  = findSet(edge.getEndVertex()).orElseThrow(()->new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + edge.getStartVertex().getName()));
+			SetObject startVertexSetObject=findSet(edge.getStartVertex());
+			SetObject endVertexSetObject  = findSet(edge.getEndVertex());
 			
 			if(startVertexSetObject!=endVertexSetObject)
 			{
@@ -115,9 +115,19 @@ public final class KruskalAlgorithm
 		      });
 	}
 	
-	private Optional<SetObject> findSet(Vertex vertex)
+	private SetObject findSet(Vertex vertex)
 	{
-		return Optional.ofNullable(nodes.stream().filter(n->n.getVertexChar()==vertex.getName()).map(n->n.getHead()).collect(Collectors.toSet()).iterator().next());
+		Set<SetObject> setObject= nodes.stream().filter(n->n.getVertexChar()==vertex.getName()).map(n->n.getHead()).collect(Collectors.toSet());
+		if(setObject==null || setObject.isEmpty())
+		{
+			throw new IllegalStateException("Couldn't find the set representative object corresponding to the vertex:" + vertex.getName());
+		}
+		
+		if(setObject.size()>1)
+		{
+			throw new IllegalStateException("There are more than 1 set objects corresponding to the vertex:" + vertex.getName());
+		}
+		return setObject.iterator().next();
 	}
 	
 	private void union(SetObject start,SetObject end)
